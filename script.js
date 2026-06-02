@@ -190,19 +190,34 @@ function parseTableData() {
     tableData = [];
 
     for (let i = 0; i < data.length; i++) {
+        // Split by space, tab or multiple spaces
         const row = data[i].trim().split(/\s+/);
-        if (row.length === 2 && row[0].length === 6 && row[1].length === 6) {
+        
+        if (row.length >= 2) {
+            // Pad numbers to 6 digits with leading zeros
+            const col1 = row[0].padStart(6, '0');
+            const col2 = row[1].padStart(6, '0');
+            
             tableData.push({
                 row: i + 1,
-                col1: row[0],
-                col2: row[1]
+                col1: col1,
+                col2: col2
             });
         }
     }
 
     if (tableData.length === 0) {
-        alert('Invalid table format. Please enter 24 rows with 2 columns of 6-digit numbers.');
+        alert('Invalid table format. Please enter at least one row with two numbers.');
         return false;
+    }
+
+    // Ensure we have 24 rows for consistency, fill with zeros if less
+    while (tableData.length < 24) {
+        tableData.push({
+            row: tableData.length + 1,
+            col1: '000000',
+            col2: '000000'
+        });
     }
 
     return true;
