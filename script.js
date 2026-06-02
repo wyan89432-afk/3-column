@@ -147,15 +147,40 @@ function handleImageDrop(e) {
     }
 }
 
-function handleImageUpload(e) {
+async function handleImageUpload(e) {
     const file = e.target.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            // In production, use OCR to extract table data from image
-            alert('Image uploaded: ' + file.name + '\n\nIn production, OCR would extract the table data.');
-        };
-        reader.readAsDataURL(file);
+        const uploadArea = document.getElementById('uploadArea');
+        const originalText = uploadArea.innerHTML;
+        uploadArea.innerHTML = '<p>Processing image... Please wait ⏳</p>';
+
+        try {
+            const worker = await Tesseract.createWorker('eng');
+            const ret = await worker.recognize(file);
+            const text = ret.data.text;
+            await worker.terminate();
+
+            // Extract 6-digit numbers from OCR text
+            const numbers = text.match(/\b\d{6}\b/g);
+            
+            if (numbers && numbers.length >= 2) {
+                let formattedData = "";
+                for (let i = 0; i < numbers.length; i += 2) {
+                    if (numbers[i+1]) {
+                        formattedData += `${numbers[i]} ${numbers[i+1]}\n`;
+                    }
+                }
+                document.getElementById('tableData').value = formattedData.trim();
+                alert('Success! Extracted ' + numbers.length + ' numbers from the image.');
+            } else {
+                alert('No 6-digit numbers found in the image. Please try a clearer image or enter manually.');
+            }
+        } catch (error) {
+            console.error('OCR Error:', error);
+            alert('Error processing image. Please try again or enter manually.');
+        } finally {
+            uploadArea.innerHTML = originalText;
+        }
     }
 }
 
