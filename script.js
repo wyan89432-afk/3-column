@@ -260,55 +260,108 @@ function analyzeLast(startRow1, startRow2) {
 function analyzeByDigitPosition(startRow1, startRow2, digitIndex) {
     const results = [];
     let colorIndex = 0;
+    
+    // Position from right: 4th (index 2), 2nd (index 4), Last (index 5)
+    // Actually the user said: 4th digit from right, 2nd from right, Last.
+    // In a 6-digit string "123456":
+    // 4th from right is index 2 (digit '3')
+    // 2nd from right is index 4 (digit '5')
+    // Last is index 5 (digit '6')
+    
+    let actualIndex = 0;
+    if (digitIndex === 3) actualIndex = 2; // TOP: 4th from right
+    else if (digitIndex === 1) actualIndex = 4; // MIDDLE: 2nd from right
+    else actualIndex = 5; // LAST: Last digit
 
-    for (let i = 0; i < tableData.length - Math.max(startRow1, startRow2) + 1; i++) {
+    const maxIterations = Math.min(
+        tableData.length - startRow1 + 1,
+        tableData.length - startRow2 + 1
+    );
+
+    for (let i = 0; i < maxIterations; i++) {
         const idx1 = startRow1 - 1 + i;
         const idx2 = startRow2 - 1 + i;
-
-        if (idx1 >= tableData.length || idx2 >= tableData.length) break;
 
         const num1 = tableData[idx1].col1;
         const num2 = tableData[idx2].col2;
 
-        // Get target digit from column 1
-        const targetDigit = num1[6 - 1 - digitIndex];
+        const targetDigit = num1[actualIndex];
+        const currentColor = colorPalette[colorIndex % colorPalette.length];
 
-        // Find matches in rows above
-        const matches = [];
-        for (let j = idx1 - 1; j >= 0; j--) {
+        // Find all occurrences of targetDigit in rows ABOVE current row in Column 1
+        const highlightedPositions = []; // Array of {rowIdx, charIdx}
+        for (let j = 0; j < idx1; j++) {
             const searchNum = tableData[j].col1;
             for (let k = 0; k < searchNum.length; k++) {
                 if (searchNum[k] === targetDigit) {
-                    matches.push({
-                        row: tableData[j].row,
-                        col1: searchNum,
-                        position: k,
-                        color: colorPalette[colorIndex % colorPalette.length]
-                    });
+                    highlightedPositions.push({ rowIdx: j, charIdx: k });
                 }
             }
         }
 
-        // Copy positions to column 2
-        const col2Highlights = matches.map(m => m.position);
-
         results.push({
-            pairIndex: i,
-            row1: tableData[idx1].row,
-            row2: tableData[idx2].row,
+            pairLabel: `Row ${idx1 + 1} ↔ Row ${idx2 + 1}`,
             num1: num1,
             num2: num2,
-            targetDigit: targetDigit,
-            targetPosition: 6 - 1 - digitIndex,
-            matches: matches,
-            col2Highlights: col2Highlights,
-            color: colorPalette[colorIndex % colorPalette.length]
+            targetIdx: actualIndex,
+            color: currentColor,
+            highlights: highlightedPositions, // These positions apply to both columns in the final display
+            allRows: tableData.map(d => ({ col1: d.col1, col2: d.col2 }))
         });
 
         colorIndex++;
     }
 
     return results;
+}
+
+function displayResultTable(type, results) {
+    const tableContainer = document.getElementById(type + 'Table');
+    let html = '';
+
+    results.forEach((result, pIdx) => {
+        html += `<div class="pair-result" style="margin-bottom: 2rem; border: 2px solid ${result.color}; padding: 1rem; border-radius: 8px;">`;
+        html += `<h5 style="color: ${result.color}; margin-bottom: 1rem;">Comparison: ${result.pairLabel} (Target: ${result.num1[result.targetIdx]})</h5>`;
+        html += '<table><thead><tr><th>Row</th><th>Column 1</th><th>Column 2</th></tr></thead><tbody>';
+
+        result.allRows.forEach((row, rIdx) => {
+            // Check if this row is above or equal to the current pair's row
+            const rowNum = rIdx + 1;
+            const pairRow1 = parseInt(result.pairLabel.match(/Row (\d+)/)[1]);
+            
+            let col1Content = '';
+            let col2Content = '';
+
+            for (let c = 0; c < 6; c++) {
+                const isTarget = (rowNum === pairRow1 && c === result.targetIdx);
+                const isHighlighted = result.highlights.some(h => h.rowIdx === rIdx && h.charIdx === c);
+
+                // Column 1
+                if (isTarget) {
+                    col1Content += `<span class="target-digit" style="background-color: ${result.color}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block;">${row.col1[c]}</span>`;
+                } else if (isHighlighted) {
+                    col1Content += `<span style="border: 2px solid ${result.color}; padding: 0 2px; border-radius: 2px;">${row.col1[c]}</span>`;
+                } else {
+                    col1Content += row.col1[c];
+                }
+
+                // Column 2 - Sync positions with Column 1
+                if (isTarget) {
+                    col2Content += `<span class="target-digit" style="background-color: ${result.color}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: inline-block;">${row.col2[c]}</span>`;
+                } else if (isHighlighted) {
+                    col2Content += `<span style="border: 2px solid ${result.color}; padding: 0 2px; border-radius: 2px;">${row.col2[c]}</span>`;
+                } else {
+                    col2Content += row.col2[c];
+                }
+            }
+
+            html += `<tr><td>${rowNum}</td><td>${col1Content}</td><td>${col2Content}</td></tr>`;
+        });
+
+        html += '</tbody></table></div>';
+    });
+
+    tableContainer.innerHTML = html;
 }
 
 // Display Results
@@ -318,36 +371,8 @@ function displayResults() {
     displayResultTable('last', analysisResults.last);
 }
 
-function displayResultTable(type, results) {
-    const tableContainer = document.getElementById(type + 'Table');
-    let html = '<table><thead><tr><th>Row</th><th>Column 1</th><th>Column 2</th></tr></thead><tbody>';
-
-    results.forEach(result => {
-        const col1Html = highlightDigits(result.num1, [result.targetPosition], result.color);
-        const col2Html = highlightDigits(result.num2, result.col2Highlights, result.color);
-
-        html += `<tr>
-            <td>${result.row1} ↔ ${result.row2}</td>
-            <td>${col1Html}</td>
-            <td>${col2Html}</td>
-        </tr>`;
-    });
-
-    html += '</tbody></table>';
-    tableContainer.innerHTML = html;
-}
-
-function highlightDigits(number, positions, color) {
-    let html = '';
-    for (let i = 0; i < number.length; i++) {
-        if (positions.includes(i)) {
-            html += `<span class="highlighted" style="background-color: ${color}; color: white; border-radius: 3px; padding: 2px 4px;">${number[i]}</span>`;
-        } else {
-            html += number[i];
-        }
-    }
-    return html;
-}
+// Display result logic is now handled inside the updated displayResultTable above.
+// Removing redundant highlightDigits function.
 
 function switchResultTab(tab) {
     document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));

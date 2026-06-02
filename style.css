@@ -394,11 +394,19 @@ textarea:focus {
     background: #f9f9f9;
 }
 
-.highlighted {
-    background: rgba(52, 152, 219, 0.2);
-    border-radius: 3px;
-    padding: 2px 4px;
-    font-weight: bold;
+.target-digit {
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    transform: scale(1.1);
+    z-index: 1;
+}
+
+.pair-result table {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.pair-result th, .pair-result td {
+    padding: 4px 8px !important;
 }
 
 /* Export Options */
