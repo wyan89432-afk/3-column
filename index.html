@@ -1,188 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Pattern Analyzer</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- OCR Library -->
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Number Pattern Analyzer</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <h1 class="logo">Pattern Analyzer</h1>
-            <div class="nav-links" id="navLinks">
-                <a href="#" onclick="showSection('home')">Home</a>
-                <a href="#" onclick="showSection('dashboard')">Dashboard</a>
-                <a href="#" onclick="showSection('profile')">Profile</a>
-                <a href="#" onclick="logout()">Logout</a>
-            </div>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="logo">Pattern Analyzer</h1>
+      <div class="nav-links" id="navLinks">
+        <a href="#" onclick="showSection('home')">Home</a>
+        <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+        <a href="#" onclick="showSection('profile')">Profile</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <section id="authSection" class="auth-section">
+    <div class="auth-container">
+      <div class="auth-box">
+        <h2>Welcome to Number Pattern Analyzer</h2>
+        <p>Analyze number patterns with precision</p>
+
+        <div class="auth-tabs">
+          <button class="tab-btn active" onclick="switchTab('login', event)">Login</button>
+          <button class="tab-btn" onclick="switchTab('register', event)">Register</button>
         </div>
-    </nav>
 
-    <!-- Auth Section -->
-    <section id="authSection" class="auth-section">
-        <div class="auth-container">
-            <div class="auth-box">
-                <h2>Welcome to Number Pattern Analyzer</h2>
-                <p>Analyze number patterns with precision</p>
-                
-                <div class="auth-tabs">
-                    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-                    <button class="tab-btn" onclick="switchTab('register')">Register</button>
-                </div>
+        <form id="loginForm" class="auth-form active">
+          <input type="email" placeholder="Email" required />
+          <input type="password" placeholder="Password" required />
+          <button type="submit" class="btn-primary">Login</button>
+          <button type="button" class="btn-google" onclick="googleLogin()">
+            🔐 Login with Google
+          </button>
+        </form>
 
-                <!-- Login Form -->
-                <form id="loginForm" class="auth-form active">
-                    <input type="email" placeholder="Email" required>
-                    <input type="password" placeholder="Password" required>
-                    <button type="submit" class="btn-primary">Login</button>
-                    <button type="button" class="btn-google" onclick="googleLogin()">
-                        🔐 Login with Google
-                    </button>
-                </form>
+        <form id="registerForm" class="auth-form">
+          <input type="text" placeholder="Full Name" required />
+          <input type="email" placeholder="Email" required />
+          <input type="password" placeholder="Password" required />
+          <input type="password" placeholder="Confirm Password" required />
+          <button type="submit" class="btn-primary">Register</button>
+        </form>
+      </div>
+    </div>
+  </section>
 
-                <!-- Register Form -->
-                <form id="registerForm" class="auth-form">
-                    <input type="text" placeholder="Full Name" required>
-                    <input type="email" placeholder="Email" required>
-                    <input type="password" placeholder="Password" required>
-                    <input type="password" placeholder="Confirm Password" required>
-                    <button type="submit" class="btn-primary">Register</button>
-                </form>
-            </div>
-        </div>
+  <div id="mainContent" class="main-content" style="display: none;">
+    <section id="home" class="section active">
+      <div class="container">
+        <h2>Welcome to Number Pattern Analyzer</h2>
+        <p>Upload a table image or enter data manually to analyze number patterns.</p>
+        <button class="btn-primary" onclick="showSection('dashboard')">Start Analyzing</button>
+      </div>
     </section>
 
-    <!-- Main Content (Hidden until login) -->
-    <div id="mainContent" class="main-content" style="display: none;">
-        
-        <!-- Home Section -->
-        <section id="home" class="section active">
-            <div class="container">
-                <h2>Welcome to Number Pattern Analyzer</h2>
-                <p>Upload a table image or enter data manually to analyze number patterns.</p>
-                <button class="btn-primary" onclick="showSection('dashboard')">Start Analyzing</button>
+    <section id="dashboard" class="section">
+      <div class="container">
+        <h2>Dashboard</h2>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <h3>Upload Table</h3>
+            <div class="upload-area" id="uploadArea">
+              <p>Drag & drop image here or click to select</p>
+              <input type="file" id="imageInput" accept="image/*" style="display: none;" />
             </div>
-        </section>
+          </div>
 
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="section">
-            <div class="container">
-                <h2>Dashboard</h2>
-                
-                <div class="dashboard-grid">
-                    <!-- Upload Section -->
-                    <div class="card">
-                        <h3>Upload Table</h3>
-                        <div class="upload-area" id="uploadArea">
-                            <p>Drag & drop image here or click to select</p>
-                            <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                        </div>
-                    </div>
+          <div class="card">
+            <h3>Manual Entry</h3>
+            <textarea id="tableData" placeholder="Enter 24 rows × 2 columns (6-digit numbers)&#10;Format: number1 number2" rows="8"></textarea>
+          </div>
 
-                    <!-- Manual Entry Section -->
-                    <div class="card">
-                        <h3>Manual Entry</h3>
-                        <textarea id="tableData" placeholder="Enter 24 rows × 2 columns (6-digit numbers)&#10;Format: number1 number2" rows="8"></textarea>
-                    </div>
-
-                    <!-- Row Selection -->
-                    <div class="card">
-                        <h3>Row Selection</h3>
-                        <div class="input-group">
-                            <label>Column 1 Start Row:</label>
-                            <input type="number" id="row1" min="1" max="24" placeholder="e.g., 9">
-                        </div>
-                        <div class="input-group">
-                            <label>Column 2 Start Row:</label>
-                            <input type="number" id="row2" min="1" max="24" placeholder="e.g., 11">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Analysis Button -->
-                <div class="action-buttons">
-                    <button class="btn-primary" onclick="analyzePattern()">Analyze Pattern</button>
-                    <button class="btn-secondary" onclick="clearData()">Clear</button>
-                </div>
-
-                <!-- Results Section -->
-                <div id="resultsSection" class="results-section" style="display: none;">
-                    <h3>Analysis Results</h3>
-                    
-                    <div class="results-tabs">
-                        <button class="result-tab active" onclick="switchResultTab('top')">TOP</button>
-                        <button class="result-tab" onclick="switchResultTab('middle')">MIDDLE</button>
-                        <button class="result-tab" onclick="switchResultTab('last')">LAST</button>
-                    </div>
-
-                    <!-- TOP Result -->
-                    <div id="topResult" class="result-content active">
-                        <h4>TOP Analysis (4th digit from right)</h4>
-                        <div id="topTable" class="result-table"></div>
-                    </div>
-
-                    <!-- MIDDLE Result -->
-                    <div id="middleResult" class="result-content">
-                        <h4>MIDDLE Analysis (2nd digit from right)</h4>
-                        <div id="middleTable" class="result-table"></div>
-                    </div>
-
-                    <!-- LAST Result -->
-                    <div id="lastResult" class="result-content">
-                        <h4>LAST Analysis (Last digit)</h4>
-                        <div id="lastTable" class="result-table"></div>
-                    </div>
-
-                    <!-- Export Options -->
-                    <div class="export-options">
-                        <h4>Export Results</h4>
-                        <div class="export-buttons">
-                            <button class="btn-export" onclick="exportAsImage('png')">📥 PNG</button>
-                            <button class="btn-export" onclick="exportAsImage('jpg')">📥 JPG</button>
-                            <button class="btn-export" onclick="exportAsImage('webp')">📥 WEBP</button>
-                            <button class="btn-export" onclick="exportAsTable('excel')">📊 Excel</button>
-                            <button class="btn-export" onclick="exportAsTable('csv')">📊 CSV</button>
-                            <button class="btn-export" onclick="exportAsTable('pdf')">📄 PDF</button>
-                        </div>
-                    </div>
-
-                    <!-- Delete Options -->
-                    <div class="delete-options">
-                        <button class="btn-delete" onclick="deleteResult()">🗑️ Delete Result</button>
-                        <button class="btn-delete" onclick="deleteProject()">🗑️ Delete Project</button>
-                    </div>
-                </div>
-
-                <!-- History Section -->
-                <div class="history-section">
-                    <h3>Recent Projects</h3>
-                    <div id="historyList" class="history-list">
-                        <p>No projects yet. Create one to get started!</p>
-                    </div>
-                </div>
+          <div class="card">
+            <h3>Row Selection</h3>
+            <div class="input-group">
+              <label>Column 1 Start Row:</label>
+              <input type="number" id="row1" min="1" max="24" placeholder="e.g., 9" />
             </div>
-        </section>
-
-        <!-- Profile Section -->
-        <section id="profile" class="section">
-            <div class="container">
-                <h2>User Profile</h2>
-                <div class="profile-card">
-                    <div class="profile-info">
-                        <p><strong>Name:</strong> <span id="userName">User Name</span></p>
-                        <p><strong>Email:</strong> <span id="userEmail">user@example.com</span></p>
-                        <p><strong>Member Since:</strong> <span id="memberDate">N/A</span></p>
-                    </div>
-                    <button class="btn-delete" onclick="deleteAccount()">🗑️ Delete Account</button>
-                </div>
+            <div class="input-group">
+              <label>Column 2 Start Row:</label>
+              <input type="number" id="row2" min="1" max="24" placeholder="e.g., 11" />
             </div>
-        </section>
-    </div>
+          </div>
+        </div>
 
-    <script src="script.js"></script>
+        <div class="action-buttons">
+          <button class="btn-primary" onclick="analyzePattern()">Analyze Pattern</button>
+          <button class="btn-secondary" onclick="clearData()">Clear</button>
+        </div>
+
+        <div id="resultsSection" class="results-section" style="display: none;">
+          <h3>Analysis Results</h3>
+
+          <div class="results-tabs">
+            <button class="result-tab active" onclick="switchResultTab('top', event)">TOP</button>
+            <button class="result-tab" onclick="switchResultTab('middle', event)">MIDDLE</button>
+            <button class="result-tab" onclick="switchResultTab('last', event)">LAST</button>
+          </div>
+
+          <div id="topResult" class="result-content active">
+            <h4>TOP Analysis (4th digit from LEFT)</h4>
+            <div id="topTable" class="result-table"></div>
+          </div>
+
+          <div id="middleResult" class="result-content">
+            <h4>MIDDLE Analysis (2nd digit from right)</h4>
+            <div id="middleTable" class="result-table"></div>
+          </div>
+
+          <div id="lastResult" class="result-content">
+            <h4>LAST Analysis (Last digit)</h4>
+            <div id="lastTable" class="result-table"></div>
+          </div>
+
+          <div class="export-options">
+            <h4>Export Results</h4>
+            <div class="export-buttons">
+              <button class="btn-export" onclick="exportAsImage('png')">📥 PNG</button>
+              <button class="btn-export" onclick="exportAsImage('jpg')">📥 JPG</button>
+              <button class="btn-export" onclick="exportAsImage('webp')">📥 WEBP</button>
+              <button class="btn-export" onclick="exportAsTable('excel')">📊 Excel</button>
+              <button class="btn-export" onclick="exportAsTable('csv')">📊 CSV</button>
+              <button class="btn-export" onclick="exportAsTable('pdf')">📄 PDF</button>
+            </div>
+          </div>
+
+          <div class="delete-options">
+            <button class="btn-delete" onclick="deleteResult()">🗑️ Delete Result</button>
+            <button class="btn-delete" onclick="deleteProject()">🗑️ Delete Project</button>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <h3>Recent Projects</h3>
+          <div id="historyList" class="history-list">
+            <p>No projects yet. Create one to get started!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="profile" class="section">
+      <div class="container">
+        <h2>User Profile</h2>
+        <div class="profile-card">
+          <div class="profile-info">
+            <p><strong>Name:</strong> <span id="userName">User Name</span></p>
+            <p><strong>Email:</strong> <span id="userEmail">user@example.com</span></p>
+            <p><strong>Member Since:</strong> <span id="memberDate">N/A</span></p>
+          </div>
+          <button class="btn-delete" onclick="deleteAccount()">🗑️ Delete Account</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
