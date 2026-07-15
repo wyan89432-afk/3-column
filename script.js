@@ -385,3 +385,81 @@ function clearData() {
   document.getElementById('row2').value = '';
   document.getElementById('resultsSection').style.display = 'none';
 }
+
+// ============ PASTE FUNCTIONALITY ============
+let selectedPasteCol = 0; // 0 = none, 1 = col1, 2 = col2
+let pasteCol1Data = []; // array of 24 numbers for col1
+let pasteCol2Data = []; // array of 24 numbers for col2
+
+function selectPasteColumn(col) {
+  selectedPasteCol = col;
+  const btn1 = document.getElementById('selectCol1Btn');
+  const btn2 = document.getElementById('selectCol2Btn');
+  const status = document.getElementById('pasteStatus');
+
+  btn1.classList.remove('active');
+  btn2.classList.remove('active');
+
+  if (col === 1) {
+    btn1.classList.add('active');
+    status.textContent = '\u2705 Column 1 selected! Numbers paste \u1001\u103b\u1015\u103c\u102e\u1038 Import \u1014\u103e\u102d\u1015\u103a\u1015\u102b';
+  } else {
+    btn2.classList.add('active');
+    status.textContent = '\u2705 Column 2 selected! Numbers paste \u1001\u103b\u1015\u103c\u102e\u1038 Import \u1014\u103e\u102d\u1015\u103a\u1015\u102b';
+  }
+}
+
+function doPasteImport() {
+  const text = document.getElementById('pasteInput').value.trim();
+  if (!text) {
+    alert('Please paste numbers first.');
+    return;
+  }
+  if (selectedPasteCol === 0) {
+    alert('Column \u1000\u102d\u102f \u1021\u101b\u1004\u103a select \u1015\u1031\u1038\u1015\u102b!');
+    return;
+  }
+
+  // Parse numbers: accept 1-6 digit numbers, pad to 6 digits
+  const parts = text.split(/[\s,;\n\r]+/).filter(p => p.length > 0);
+  const numbers = [];
+  for (const p of parts) {
+    if (/^\d{1,6}$/.test(p)) {
+      numbers.push(p.padStart(6, '0'));
+    }
+  }
+
+  if (numbers.length === 0) {
+    alert('No valid numbers found.');
+    return;
+  }
+
+  // Store into selected column (max 24 rows)
+  if (selectedPasteCol === 1) {
+    pasteCol1Data = numbers.slice(0, 24);
+  } else {
+    pasteCol2Data = numbers.slice(0, 24);
+  }
+
+  // Update the tableData textarea
+  updateTableDataFromPaste();
+
+  const status = document.getElementById('pasteStatus');
+  status.textContent = `\u2705 Imported ${Math.min(numbers.length, 24)} numbers into Column ${selectedPasteCol}! Select another column to paste more.`;
+  document.getElementById('pasteInput').value = '';
+  selectedPasteCol = 0;
+  document.getElementById('selectCol1Btn').classList.remove('active');
+  document.getElementById('selectCol2Btn').classList.remove('active');
+}
+
+function updateTableDataFromPaste() {
+  // Merge col1 and col2 data into tableData textarea
+  const maxRows = Math.max(pasteCol1Data.length, pasteCol2Data.length, 24);
+  let output = '';
+  for (let i = 0; i < 24; i++) {
+    const c1 = pasteCol1Data[i] || '000000';
+    const c2 = pasteCol2Data[i] || '000000';
+    output += c1 + ' ' + c2 + '\n';
+  }
+  document.getElementById('tableData').value = output.trim();
+}

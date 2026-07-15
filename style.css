@@ -15,6 +15,58 @@
   --shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
+.paste-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.col-select-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-col-select {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  background: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-col-select:hover {
+  border-color: var(--primary-color);
+}
+
+.btn-col-select.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.paste-status {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  padding: 6px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.paste-area {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  min-height: 80px;
+  resize: vertical;
+  font-family: 'Courier New', monospace;
+}
+
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;

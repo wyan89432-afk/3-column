@@ -79,6 +79,19 @@
           </div>
 
           <div class="card">
+            <h3>📋 Paste from Excel</h3>
+            <div class="paste-controls">
+              <div class="col-select-row">
+                <button class="btn-col-select" id="selectCol1Btn" onclick="selectPasteColumn(1)">Select Column 1</button>
+                <button class="btn-col-select" id="selectCol2Btn" onclick="selectPasteColumn(2)">Select Column 2</button>
+              </div>
+              <div class="paste-status" id="pasteStatus">👆 Column ကို select ပေးပြီး numbers paste ချပါ</div>
+              <textarea id="pasteInput" class="paste-area" placeholder="Numbers paste ချပါ (1 line per number, 1-3 digits)" rows="5"></textarea>
+              <button class="btn-primary" onclick="doPasteImport()">✓ Import</button>
+            </div>
+          </div>
+
+          <div class="card">
             <h3>Row Selection</h3>
             <div class="input-group">
               <label>Column 1 Start Row:</label>
